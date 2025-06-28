@@ -1,4 +1,4 @@
-from .causal_engine import CausalEngine
+from core.causal_engine import CausalEngine
 from transformers import pipeline
 
 class FreelancerAgent:
@@ -7,12 +7,14 @@ class FreelancerAgent:
         self.llm = pipeline("text-classification", model="nlpaueb/legal-bert-small")
 
     def analyze(self, text: str) -> dict:
-        clauses = self.llm(text, truncation=True)
+        # Naively split text into clauses by period
+        clauses = [clause.strip() for clause in text.split('.') if clause.strip()]
         results = []
-        for clause in clauses[:3]:
-            risk = self.ce.predict_risk(clause['text'], clause['label'])
+        for clause_text in clauses[:3]:  # analyze first 3 clauses
+            classification = self.llm(clause_text, truncation=True)[0]  # returns dict with 'label' and 'score'
+            risk = self.ce.predict_risk(clause_text, classification['label'])
             results.append({
-                "clause": clause['text'][:50] + "...",
+                "clause": clause_text[:50] + ("..." if len(clause_text) > 50 else ""),
                 "risk": risk,
                 "suggestion": "Consider clarifying terms." if risk > 5 else None
             })
