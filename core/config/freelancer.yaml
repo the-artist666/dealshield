@@ -1,0 +1,6 @@
+limits:
+  max_contracts: 3
+  max_length: 5000
+monetization:
+  upgrade_price: 7
+  upgrade_cta: "Unlock full analysis for $7"
